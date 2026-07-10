@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react'
 
 export default function App(){
-  // --- 1. LOCAL STORAGE INTEGRATION WITH LAZY INITIALIZATION ---
   const [todos, setTodos] = useState(() => {
     const SaveTodos = localStorage.getItem('TodoList') 
     return SaveTodos ? JSON.parse(SaveTodos) : []
   })
       
-  // --- 2. EFFECT TO SYNC STATE TO LOCAL STORAGE ---
   useEffect(() => {
     localStorage.setItem('TodoList', JSON.stringify(todos))
   }, [todos])
@@ -36,7 +34,6 @@ export default function App(){
     setTodos(updatedTodos);
   }
 
-  // --- PREMIUM INLINE STYLE SHEET ---
   const styles = {
     container: {
       minHeight: '100vh',
@@ -92,7 +89,7 @@ export default function App(){
       padding: '12px 0',
     },
     addButton: {
-      backgroundColor: '#22d3ee', // Cyan 400
+      backgroundColor: '#22d3ee', 
       color: '#0f172a',
       border: 'none',
       fontWeight: '700',
@@ -148,12 +145,12 @@ export default function App(){
     <div style={styles.container}>
       <div style={styles.card}>
         
-        {/* Header Title */}
+        
         <h1 style={styles.title}>
           To-Do List <span style={{fontSize: '22px'}}>📋</span>
         </h1>
         
-        {/* Input Form Wrapper */}
+  
         <form 
           onSubmit={(e) => handleTodolist(e)} 
           style={styles.form}
@@ -175,15 +172,14 @@ export default function App(){
           </button>
         </form>
         
-        {/* Elegant Items List */}
         <ul style={styles.todoList}>
           {todos.map((item, index) => (
             <li key={index} style={styles.liItem}>
               
-              {/* Checkbox and text area */}
+        
               <div onClick={() => toggleComplete(index)} style={styles.leftArea}>
                 
-                {/* Smooth Round Checkbox */}
+              
                 <div style={{
                   width: '22px',
                   height: '22px',
@@ -200,7 +196,6 @@ export default function App(){
                   )}
                 </div>
 
-                {/* Elegant Text decoration styling */}
                 <span style={{
                   fontSize: '15px',
                   fontWeight: '500',
@@ -214,7 +209,6 @@ export default function App(){
                 </span>
               </div>
               
-              {/* Clean Minimalist Cut Cross Button */}
               <button 
                 onClick={() => deleteTodo(index)}
                 style={styles.crossButton}
@@ -228,7 +222,6 @@ export default function App(){
           ))}
         </ul>
 
-        {/* Empty state details */}
         {todos.length === 0 && (
           <p style={{ textAlign: 'center', color: '#64748b', fontSize: '13px', marginTop: '24px', fontWeight: '500' }}>
             No tasks found.....
