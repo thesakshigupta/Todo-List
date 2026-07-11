@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react'
 
-export default function App(){
+export default function App() {
   const [todos, setTodos] = useState(() => {
     const SaveTodos = localStorage.getItem('TodoList') 
     return SaveTodos ? JSON.parse(SaveTodos) : []
   })
-      
+
   useEffect(() => {
     localStorage.setItem('TodoList', JSON.stringify(todos))
-  }, [todos])
+  }, [todos]) 
 
   async function handleTodolist(e) {
     e.preventDefault();
-    const Input = e.target[0].value 
-    if(!Input.trim()) return;
-
-    setTodos([...todos, { text: Input.trim(), completed: false }])
+    const Input = e.target.todo.value.trim();
+    if (!Input) return; 
+    setTodos(prev => [...prev, Input]);
     e.target.reset()
   }
 
@@ -24,16 +23,15 @@ export default function App(){
     setTodos(updatedTodos);
   }
 
-  function toggleComplete(indexToToggle) {
-    const updatedTodos = todos.map((item, index) => {
-      if (index === indexToToggle) {
-        return { ...item, completed: !item.completed };
-      }
-      return item;
-    });
-    setTodos(updatedTodos);
+  function editTodo(i) {
+    const editValue = prompt(`Enter edit value for "${todos[i]}"`)
+    if (editValue === null || editValue.trim() === '') return;
+    setTodos(prev =>
+      prev.map((todo, index) => index === i ? editValue.trim() : todo)
+    );
   }
 
+  // Pure CSS-in-JS design system
   const styles = {
     container: {
       minHeight: '100vh',
@@ -51,7 +49,7 @@ export default function App(){
     },
     card: {
       width: '100%',
-      maxWidth: '420px',
+      maxWidth: '440px',
       backgroundColor: '#1e293b', 
       borderRadius: '24px',
       padding: '32px',
@@ -64,10 +62,16 @@ export default function App(){
       fontSize: '26px',
       fontWeight: '800',
       letterSpacing: '-0.5px',
-      margin: '0 0 24px 0',
+      margin: '0 0 6px 0',
       display: 'flex',
       alignItems: 'center',
       gap: '10px'
+    },
+    subtitle: {
+      color: '#64748b',
+      fontSize: '13px',
+      fontWeight: '500',
+      margin: '0 0 24px 0'
     },
     form: {
       display: 'flex',
@@ -95,18 +99,20 @@ export default function App(){
       fontWeight: '700',
       fontSize: '13px',
       letterSpacing: '0.5px',
-      padding: '12px 24px',
+      padding: '12px 20px',
       borderRadius: '12px',
       cursor: 'pointer',
       transition: 'all 0.2s ease',
-      boxShadow: '0 4px 14px rgba(34, 211, 238, 0.3)'
+      boxShadow: '0 4px 14px rgba(34, 211, 238, 0.2)'
     },
     todoList: {
       padding: 0,
       margin: 0,
       display: 'flex',
       flexDirection: 'column',
-      gap: '12px'
+      gap: '12px',
+      maxHeight: '360px',
+      overflowY: 'auto'
     },
     liItem: {
       display: 'flex',
@@ -117,27 +123,29 @@ export default function App(){
       borderRadius: '14px',
       border: '1px solid rgba(255, 255, 255, 0.05)',
       listStyle: 'none',
-      transition: 'transform 0.2s, border-color 0.2s'
+      transition: 'all 0.2s'
     },
-    leftArea: {
+    todoText: {
+      fontSize: '15px',
+      fontWeight: '500',
+      color: '#f1f5f9',
+      wordBreak: 'break-all',
+      paddingRight: '12px'
+    },
+    actionsContainer: {
       display: 'flex',
-      alignItems: 'center',
-      gap: '14px',
-      flex: 1,
-      cursor: 'pointer',
-      userSelect: 'none'
+      gap: '6px',
+      flexShrink: 0
     },
-    crossButton: {
-      backgroundColor: 'transparent',
+    actionBtn: {
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
       border: 'none',
-      color: '#64748b',
-      fontSize: '18px',
+      fontSize: '12px',
+      fontWeight: '600',
+      padding: '6px 12px',
+      borderRadius: '8px',
       cursor: 'pointer',
-      padding: '4px 8px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'color 0.2s'
+      transition: 'all 0.2s'
     }
   }
 
@@ -145,21 +153,23 @@ export default function App(){
     <div style={styles.container}>
       <div style={styles.card}>
         
-        
+        {/* Header */}
         <h1 style={styles.title}>
-          To-Do List <span style={{fontSize: '22px'}}>📋</span>
+          Todo List <span style={{fontSize: '22px'}}>📋</span>
         </h1>
+        <p style={styles.subtitle}>Apne daily tasks ko manage aur track karein.</p>
         
-  
+        {/* Input Form */}
         <form 
-          onSubmit={(e) => handleTodolist(e)} 
+          onSubmit={handleTodolist} 
           style={styles.form}
           onFocus={(e) => e.currentTarget.style.borderColor = '#22d3ee'}
           onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
         >
           <input 
             type="text" 
-            placeholder="Add a brilliant task..." 
+            name="todo"
+            placeholder="Add a new task..." 
             style={styles.input}
           />
           <button 
@@ -172,59 +182,43 @@ export default function App(){
           </button>
         </form>
         
+        {/* Todo Items */}
         <ul style={styles.todoList}>
-          {todos.map((item, index) => (
-            <li key={index} style={styles.liItem}>
+          {todos && todos.map((item, index) => (
+            <li 
+              key={index} 
+              style={styles.liItem}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)'}
+            >
+              <span style={styles.todoText}>{item}</span>
               
-        
-              <div onClick={() => toggleComplete(index)} style={styles.leftArea}>
-                
-              
-                <div style={{
-                  width: '22px',
-                  height: '22px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: item.completed ? '2px solid #22d3ee' : '2px solid #475569',
-                  backgroundColor: item.completed ? '#22d3ee' : 'transparent',
-                  transition: 'all 0.2s ease'
-                }}>
-                  {item.completed && (
-                    <span style={{ color: '#0f172a', fontSize: '11px', fontWeight: '900' }}>✓</span>
-                  )}
-                </div>
-
-                <span style={{
-                  fontSize: '15px',
-                  fontWeight: '500',
-                  color: item.completed ? '#64748b' : '#f1f5f9',
-                  textDecoration: item.completed ? 'line-through' : 'none',
-                  opacity: item.completed ? 0.6 : 1,
-                  wordBreak: 'break-all',
-                  transition: 'all 0.2s'
-                }}>
-                  {item.text}
-                </span>
+              <div style={styles.actionsContainer}>
+                <button 
+                  onClick={() => editTodo(index)}
+                  style={{...styles.actionBtn, color: '#38bdf8'}}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(56, 189, 248, 0.15)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={() => deleteTodo(index)}
+                  style={{...styles.actionBtn, color: '#f43f5e'}}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(244, 63, 94, 0.15)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                >
+                  Delete
+                </button>
               </div>
-              
-              <button 
-                onClick={() => deleteTodo(index)}
-                style={styles.crossButton}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#f43f5e'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#64748b'}
-              >
-                ✕
-              </button>
-
             </li>
           ))}
         </ul>
 
+        {/* Empty State */}
         {todos.length === 0 && (
-          <p style={{ textAlign: 'center', color: '#64748b', fontSize: '13px', marginTop: '24px', fontWeight: '500' }}>
-            No tasks found.....
+          <p style={{ textAlign: 'center', color: '#64748b', fontSize: '13px', marginTop: '16px', fontWeight: '500' }}>
+            No tasks found. Enjoy your day!
           </p>
         )}
 
@@ -232,3 +226,8 @@ export default function App(){
     </div>
   );
 }
+
+
+
+
+
